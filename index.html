@@ -6,6 +6,20 @@
     <title>Snooker Scoreboard</title>
     <link rel="shortcut icon" href="8_ball.png">
     <style>
+        /* Disable text selection and copy across the whole site */
+        * {
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and older */
+            user-select: none; /* Standard syntax */
+            -webkit-touch-callout: none; /* Disable iOS long press menu */
+        }
+
+        /* Allow typing in input fields only */
+        input {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             display: flex; flex-direction: column; align-items: center;
@@ -57,11 +71,12 @@
             touch-action: manipulation;
         }
         
-        /* Specific Target for Swiping */
+        /* Number background matched to profile */
         .number { 
             font-size: 70px; font-weight: 900; min-width: 130px; text-align: center; 
             margin: 0 10px; cursor: ns-resize; touch-action: none; 
-            background: rgba(0,0,0,0.1); border-radius: 10px;
+            background: transparent; /* Changed from rgba to transparent */
+            border-radius: 10px;
         }
         
         .player-input {
@@ -98,9 +113,7 @@
         .footer a { color: #ffd700; text-decoration: none; font-weight: bold; }
     </style>
 </head>
-<body>
-
-    <h2 style="margin: 20px 0 10px 0; color: #ffd700; letter-spacing: 2px; text-transform: uppercase;">Snooker Scoreboard</h2>
+<body oncontextmenu="return false;"> <h2 style="margin: 20px 0 10px 0; color: #ffd700; letter-spacing: 2px; text-transform: uppercase;">Snooker Scoreboard</h2>
     
     <div class="top-btns">
         <button class="rules-btn" onclick="showRules()">Color Rules 📋</button>
@@ -133,6 +146,13 @@
         let boxData = JSON.parse(localStorage.getItem('mySiteData')) || [{ val: 0, text: 'Player 1' }, { val: 0, text: 'Player 2' }];
         let touchStartY = 0; let touchEndY = 0;
 
+        // Extra layer to disable long-press copy on mobile
+        window.oncontextmenu = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
+
         function renderBoxes() {
             const container = document.getElementById('grid-container');
             container.innerHTML = '';
@@ -152,7 +172,6 @@
                     <input type="text" class="player-input" value="${data.text}" oninput="updateText(${index}, this.value)">
                 `;
 
-                // TARGETED SWIPE: Sirf ".number" element par listener lagaya hai
                 const scoreDisplay = boxDiv.querySelector('.number');
                 
                 scoreDisplay.addEventListener('touchstart', (e) => {
@@ -178,9 +197,9 @@
 
         function handleSwipe(index) {
             const distance = touchStartY - touchEndY;
-            if (Math.abs(distance) < 30) return; // Ignore small accidental touches
-            if (distance > 0) changeVal(index, 1);  // Swipe Up
-            else changeVal(index, -1);             // Swipe Down
+            if (Math.abs(distance) < 30) return; 
+            if (distance > 0) changeVal(index, 1); 
+            else changeVal(index, -1);
         }
 
         function changeVal(index, amount) { 
@@ -202,7 +221,6 @@
         }
         function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; }
         
-        // Rules and Records functions (Simplified for this block)
         function showRules() { alert("Rules: Red=1, Yellow=2, Green=3, Brown=4, Blue=5, Pink=6, Black=7"); }
         function showRecords() { alert("Match history feature is active."); }
 
