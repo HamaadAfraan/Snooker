@@ -11,7 +11,6 @@
             display: flex; flex-direction: column; align-items: center;
             background-color: #1a1a2e; color: white;
             padding: 10px; margin: 0; min-height: 100vh;
-            /* Prevent accidental refresh on swipe down */
             overscroll-behavior-y: contain;
         }
         
@@ -32,7 +31,6 @@
             position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
             min-height: 160px; justify-content: center;
             transition: transform 0.2s;
-            /* Important: Prevents scrolling while swiping on the card */
             touch-action: none; 
         }
 
@@ -41,7 +39,7 @@
             border: 3px dashed rgba(255, 255, 255, 0.2);
             cursor: pointer; color: rgba(255, 255, 255, 0.4);
             min-height: 100px;
-            touch-action: auto !important; /* Allow scroll on add button */
+            touch-action: auto !important;
         }
         .add-box:hover { background: rgba(255, 255, 255, 0.1); border-color: #ffd700; color: #ffd700; }
 
@@ -55,7 +53,6 @@
             z-index: 10;
         }
 
-        /* Player Colors */
         .color-0 { background: #1e3799; color: white; }
         .color-1 { background: #82ccdd; color: #0a3d62; }
         .color-2 { background: #4b134f; color: white; }
@@ -67,13 +64,20 @@
         .color-8 { background: #b71540; color: white; }
         .color-9 { background: #ffcccc; color: #b71540; }
 
-        .counter { display: flex; align-items: center; margin-bottom: 12px; }
+        .counter { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            padding: 10px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05); /* Highlight score area slightly */
+        }
         .btn {
             font-size: 30px; width: 55px; height: 55px;
             border: none; border-radius: 50%; cursor: pointer;
             background: rgba(255, 255, 255, 0.2); color: inherit;
             font-weight: bold;
-            touch-action: manipulation; /* Faster taps */
+            touch-action: manipulation;
         }
         .number { font-size: 60px; font-weight: 900; min-width: 120px; text-align: center; margin: 0 10px; pointer-events: none; }
         
@@ -82,6 +86,7 @@
             font-size: 24px; font-weight: bold; text-align: center;
             color: inherit; outline: none; border-bottom: 2px solid rgba(255,255,255,0.2);
             padding: 5px;
+            touch-action: auto; /* Allow normal typing */
         }
 
         .controls { display: flex; gap: 15px; margin: 20px 0; width: 100%; justify-content: center; }
@@ -250,7 +255,6 @@
             { val: 0, text: 'Player 2' }
         ];
 
-        // Gesture Variables
         let touchStartY = 0;
         let touchEndY = 0;
 
@@ -260,34 +264,35 @@
             boxData.forEach((data, index) => {
                 const boxDiv = document.createElement('div');
                 boxDiv.className = `box ${colorClasses[index]}`;
-                
-                // Adding Gesture Listeners to each box
-                boxDiv.addEventListener('touchstart', (e) => {
-                    // Only trigger swipe if not clicking button or input
-                    if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-                        touchStartY = e.touches[0].clientY;
-                    }
-                }, {passive: true});
-
-                boxDiv.addEventListener('touchend', (e) => {
-                    if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-                        touchEndY = e.changedTouches[0].clientY;
-                        handleSwipe(index);
-                    }
-                }, {passive: true});
 
                 let removeBtnHtml = (boxData.length > 2 && index === boxData.length - 1) ? `<button class="remove-btn" onclick="removeLastPlayer(event)">-</button>` : '';
                 
                 boxDiv.innerHTML = `
                     ${removeBtnHtml}
-                    <div class="counter">
+                    <div class="counter" style="touch-action: none;">
                         <button class="btn" onclick="changeVal(${index}, -1)">-</button>
                         <div class="number">${data.val}</div>
                         <button class="btn" onclick="changeVal(${index}, 1)">+</button>
                     </div>
                     <input type="text" class="player-input" placeholder="Name..." value="${data.text}" oninput="updateText(${index}, this.value)">
-                    
                 `;
+
+                // TARGETED SWIPE: Sirf counter area par swipe listen karna hai
+                const counterArea = boxDiv.querySelector('.counter');
+                
+                counterArea.addEventListener('touchstart', (e) => {
+                    if(e.target.tagName !== 'BUTTON') {
+                        touchStartY = e.touches[0].clientY;
+                    }
+                }, {passive: true});
+
+                counterArea.addEventListener('touchend', (e) => {
+                    if(e.target.tagName !== 'BUTTON') {
+                        touchEndY = e.changedTouches[0].clientY;
+                        handleSwipe(index);
+                    }
+                }, {passive: true});
+
                 container.appendChild(boxDiv);
             });
 
@@ -300,24 +305,21 @@
             }
         }
 
-        // Swipe Handler
         function handleSwipe(index) {
             const distance = touchStartY - touchEndY;
-            const threshold = 40; // minimum pixels to be considered a swipe
+            const threshold = 40; 
 
             if (distance > threshold) {
-                // Swipe Up
-                changeVal(index, 1);
+                changeVal(index, 1); // Swipe Up
             } else if (distance < -threshold) {
-                // Swipe Down
-                changeVal(index, -1);
+                changeVal(index, -1); // Swipe Down
             }
         }
 
         function addPlayer() { if (boxData.length < 10) { boxData.push({ val: 0, text: 'Player ' + (boxData.length + 1) }); saveData(); renderBoxes(); } }
         
         function removeLastPlayer(e) { 
-            e.stopPropagation(); // Stop swipe from triggering
+            e.stopPropagation(); 
             if (boxData.length > 2) { boxData.pop(); saveData(); renderBoxes(); } 
         }
 
@@ -327,7 +329,6 @@
                 boxData[index].val = newVal; 
                 saveData(); 
                 
-                // Update only the specific number element for performance
                 const boxes = document.querySelectorAll('.box');
                 if(boxes[index]) {
                     const numDiv = boxes[index].querySelector('.number');
@@ -338,8 +339,6 @@
 
         function updateText(index, value) { boxData[index].text = value; saveData(); }
         function saveData() { localStorage.setItem('mySiteData', JSON.stringify(boxData)); }
-
-        // --- All your original functions remains unchanged below ---
 
         function showWinner() {
             const sortedPlayers = [...boxData].map((p, i) => ({...p, originalIndex: i})).sort((a, b) => b.val - a.val);
