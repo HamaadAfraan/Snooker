@@ -6,16 +6,16 @@
     <title>Snooker Scoreboard</title>
     <link rel="shortcut icon" href="8_ball.png">
     <style>
-        /* Disable text selection and copy across the whole site */
+        /* 1. Disable long press and text selection everywhere */
         * {
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10 and older */
-            user-select: none; /* Standard syntax */
-            -webkit-touch-callout: none; /* Disable iOS long press menu */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
-        /* Allow typing in input fields only */
-        input {
+        /* Allow typing in name inputs */
+        input.player-input {
             user-select: text !important;
             -webkit-user-select: text !important;
         }
@@ -25,7 +25,6 @@
             display: flex; flex-direction: column; align-items: center;
             background-color: #1a1a2e; color: white;
             padding: 10px; margin: 0; min-height: 100vh;
-            overscroll-behavior-y: contain;
         }
         
         #grid-container {
@@ -38,21 +37,21 @@
             display: flex; flex-direction: column; align-items: center;
             position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
             min-height: 160px; justify-content: center;
-            touch-action: none; 
+            transition: transform 0.2s;
         }
 
         .add-box {
             background: rgba(255, 255, 255, 0.05); border: 3px dashed rgba(255, 255, 255, 0.2);
-            cursor: pointer; color: rgba(255, 255, 255, 0.4); min-height: 100px; touch-action: auto !important;
+            cursor: pointer; color: rgba(255, 255, 255, 0.4); min-height: 100px;
         }
 
         .remove-btn {
             position: absolute; top: 15px; right: 15px; background: #ff4757; color: white;
             border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
-            font-weight: bold; font-size: 20px; display: flex; align-items: center; justify-content: center; z-index: 10;
+            font-weight: bold; font-size: 20px; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Player Colors */
+        /* Player Colors (Exactly as per your original) */
         .color-0 { background: #1e3799; color: white; }
         .color-1 { background: #82ccdd; color: #0a3d62; }
         .color-2 { background: #4b134f; color: white; }
@@ -68,15 +67,12 @@
         .btn {
             font-size: 30px; width: 55px; height: 55px; border: none; border-radius: 50%; 
             cursor: pointer; background: rgba(255, 255, 255, 0.2); color: inherit; font-weight: bold;
-            touch-action: manipulation;
         }
         
-        /* Number background matched to profile */
+        /* 2. Precision Swipe Target (Background match) */
         .number { 
-            font-size: 70px; font-weight: 900; min-width: 130px; text-align: center; 
-            margin: 0 10px; cursor: ns-resize; touch-action: none; 
-            background: transparent; /* Changed from rgba to transparent */
-            border-radius: 10px;
+            font-size: 60px; font-weight: 900; min-width: 120px; text-align: center; 
+            margin: 0 10px; touch-action: none; background: transparent;
         }
         
         .player-input {
@@ -95,9 +91,10 @@
         .top-btns { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
         .rules-btn {
             background: transparent; border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; 
-            border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; text-transform: uppercase;
+            border-radius: 20px; cursor: pointer; font-size: 14px; text-transform: uppercase; font-weight: bold;
         }
 
+        /* 3. Original Overlays UI restored */
         .overlay-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 46, 0.98); flex-direction: column; align-items: center; 
@@ -109,11 +106,35 @@
             color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px;
         }
 
-        .footer { margin-top: auto; padding: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.6); text-align: center; width: 100%; }
+        .winner-card { background: #ffd700; color: #000; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; text-align: center; margin-top: 20px; }
+        .score-list { width: 95%; max-width: 500px; margin-top: 20px; }
+        .score-item { display: flex; justify-content: space-between; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; font-weight: bold; font-size: 18px; }
+
+        .rules-section { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; margin-bottom: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 15px; margin-bottom: 20px; }
+        .ball { width: 45px; height: 45px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.6), 2px 4px 6px rgba(0,0,0,0.5); margin-bottom: 4px; }
+        .ball-name { font-size: 11px; font-weight: 600; color: #a4b0be; text-transform: uppercase; }
+        .ball-score { font-size: 20px; font-weight: bold; color: #ffd700; }
+        
+        .b-red { background: red; } .b-yellow { background: #edd471; } .b-green { background: green; }
+        .b-brown { background: brown; } .b-blue { background: blue; } .b-pink { background: #ff9ff3; }
+        .b-black { background: #111; border: 1px solid #333; }
+
+        .history-card { background: rgba(255, 255, 255, 0.1); width: 90%; max-width: 500px; padding: 15px 20px; border-radius: 15px; margin-bottom: 15px; position: relative; text-align: left; }
+        .hist-date { font-size: 14px; color: #a4b0be; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .hist-status { font-size: 18px; font-weight: bold; color: #ffd700; margin-bottom: 10px; }
+        .hist-player { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 5px; }
+
+        #image-overlay { z-index: 3000; justify-content: center; }
+        #position-img { max-width: 95%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+
+        .footer { margin-top: auto; padding: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.6); text-align: center; }
         .footer a { color: #ffd700; text-decoration: none; font-weight: bold; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <h2 style="margin: 20px 0 10px 0; color: #ffd700; letter-spacing: 2px; text-transform: uppercase;">Snooker Scoreboard</h2>
+<body oncontextmenu="return false;">
+
+    <h2 style="margin: 20px 0 10px 0; color: #ffd700; letter-spacing: 2px; text-transform: uppercase;">Snooker Scoreboard</h2>
     
     <div class="top-btns">
         <button class="rules-btn" onclick="showRules()">Color Rules 📋</button>
@@ -133,25 +154,63 @@
 
     <div id="winner-overlay" class="overlay-screen">
         <h2 id="match-status" style="color: #ffd700;">FINAL STANDINGS</h2>
-        <div id="winner-info" style="background: #ffd700; color: #000; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; text-align: center;"></div>
-        <div id="all-scores" style="width: 95%; max-width: 500px; margin-top: 20px;"></div>
+        <div id="winner-info" class="winner-card"></div>
+        <div id="all-scores" class="score-list"></div>
         <div style="display: flex; gap: 15px; margin: 30px 0; width: 90%; max-width: 450px;">
             <button class="action-btn" id="save-btn" style="background:#2ecc71; flex:1;" onclick="saveMatchData()">💾 SAVE</button>
             <button class="action-btn" style="background:white; color:black; flex:1;" onclick="closeWinner()">CLOSE</button>
         </div>
     </div>
 
+    <div id="rules-overlay" class="overlay-screen">
+        <button class="close-cross" onclick="closeRules()">✕</button>
+        <h1 style="color: #ffd700; margin-bottom: 20px;">COLOR RULES</h1>
+        
+        <div class="rules-section">
+            <h2 style="color: #fff; width: 100%; border-bottom: 1px dashed rgba(255,255,255,0.3); padding-bottom:10px;">SNOOKER</h2>
+            <div class="ball-container">
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-red"></div><span class="ball-name">Red</span><span class="ball-score">1</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-yellow"></div><span class="ball-name">Yellow</span><span class="ball-score">2</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-green"></div><span class="ball-name">Green</span><span class="ball-score">3</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-brown"></div><span class="ball-name">Brown</span><span class="ball-score">4</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-blue"></div><span class="ball-name">Blue</span><span class="ball-score">5</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-pink"></div><span class="ball-name">Pink</span><span class="ball-score">6</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-black"></div><span class="ball-name">Black</span><span class="ball-score">7</span></div>
+            </div>
+            <button class="rules-btn" style="border-color: #fff; color: #fff;" onclick="showPositionImage('snooker_position.jpg')">Show Position 🎱</button>
+        </div>
+
+        <div class="rules-section">
+            <h2 style="color: #fff; width: 100%; border-bottom: 1px dashed rgba(255,255,255,0.3); padding-bottom:10px;">CENTURY</h2>
+            <div class="ball-container">
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-red"></div><span class="ball-name">Red</span><span class="ball-score">10</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-yellow"></div><span class="ball-name">Yellow</span><span class="ball-score">2</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-green"></div><span class="ball-name">Green</span><span class="ball-score">3</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-brown"></div><span class="ball-name">Brown</span><span class="ball-score">4</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-blue"></div><span class="ball-name">Blue</span><span class="ball-score">5</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-pink"></div><span class="ball-name">Pink</span><span class="ball-score">6</span></div>
+                <div style="display:flex; flex-direction:column; align-items:center;"><div class="ball b-black"></div><span class="ball-name">Black</span><span class="ball-score">7</span></div>
+            </div>
+            <button class="rules-btn" style="border-color: #fff; color: #fff;" onclick="showPositionImage('century_position.jpeg')">Show Position 🎱</button>
+        </div>
+    </div>
+
+    <div id="records-overlay" class="overlay-screen">
+        <button class="close-cross" onclick="closeRecords()">✕</button>
+        <h1 style="color: #3498db; margin-bottom: 20px;">MATCH HISTORY</h1>
+        <div id="records-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+        <button class="action-btn" style="background:#e74c3c; margin-top:20px;" onclick="clearAllRecords()">🗑️ Clear History</button>
+    </div>
+
+    <div id="image-overlay" class="overlay-screen">
+        <button class="close-cross" onclick="closePositionImage()">✕</button>
+        <img id="position-img" src="" alt="Position">
+    </div>
+
     <script>
         const colorClasses = ['color-0', 'color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6', 'color-7', 'color-8', 'color-9'];
         let boxData = JSON.parse(localStorage.getItem('mySiteData')) || [{ val: 0, text: 'Player 1' }, { val: 0, text: 'Player 2' }];
-        let touchStartY = 0; let touchEndY = 0;
-
-        // Extra layer to disable long-press copy on mobile
-        window.oncontextmenu = function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-        };
+        let tStart = 0; let tEnd = 0;
 
         function renderBoxes() {
             const container = document.getElementById('grid-container');
@@ -159,11 +218,10 @@
             boxData.forEach((data, index) => {
                 const boxDiv = document.createElement('div');
                 boxDiv.className = `box ${colorClasses[index]}`;
-
-                let removeBtnHtml = (boxData.length > 2 && index === boxData.length - 1) ? `<button class="remove-btn" onclick="removeLastPlayer(event)">-</button>` : '';
+                let removeBtn = (boxData.length > 2 && index === boxData.length - 1) ? `<button class="remove-btn" onclick="removeLastPlayer()">-</button>` : '';
                 
                 boxDiv.innerHTML = `
-                    ${removeBtnHtml}
+                    ${removeBtn}
                     <div class="counter">
                         <button class="btn" onclick="changeVal(${index}, -1)">-</button>
                         <div class="number" id="num-${index}">${data.val}</div>
@@ -172,15 +230,13 @@
                     <input type="text" class="player-input" value="${data.text}" oninput="updateText(${index}, this.value)">
                 `;
 
-                const scoreDisplay = boxDiv.querySelector('.number');
-                
-                scoreDisplay.addEventListener('touchstart', (e) => {
-                    touchStartY = e.touches[0].clientY;
-                }, {passive: true});
-
-                scoreDisplay.addEventListener('touchend', (e) => {
-                    touchEndY = e.changedTouches[0].clientY;
-                    handleSwipe(index);
+                // Swipe Logic specifically on the number
+                const numEl = boxDiv.querySelector('.number');
+                numEl.addEventListener('touchstart', (e) => { tStart = e.touches[0].clientY; }, {passive: true});
+                numEl.addEventListener('touchend', (e) => { 
+                    tEnd = e.changedTouches[0].clientY; 
+                    if (tStart - tEnd > 30) changeVal(index, 1);
+                    else if (tEnd - tStart > 30) changeVal(index, -1);
                 }, {passive: true});
 
                 container.appendChild(boxDiv);
@@ -195,34 +251,86 @@
             }
         }
 
-        function handleSwipe(index) {
-            const distance = touchStartY - touchEndY;
-            if (Math.abs(distance) < 30) return; 
-            if (distance > 0) changeVal(index, 1); 
-            else changeVal(index, -1);
-        }
-
-        function changeVal(index, amount) { 
-            boxData[index].val += amount; 
-            saveData();
-            document.getElementById(`num-${index}`).innerText = boxData[index].val;
-        }
-
+        function changeVal(i, amt) { boxData[i].val += amt; saveData(); document.getElementById(`num-${i}`).innerText = boxData[i].val; }
         function addPlayer() { if (boxData.length < 10) { boxData.push({ val: 0, text: 'Player ' + (boxData.length + 1) }); saveData(); renderBoxes(); } }
-        function removeLastPlayer(e) { e.stopPropagation(); boxData.pop(); saveData(); renderBoxes(); }
-        function updateText(index, value) { boxData[index].text = value; saveData(); }
+        function removeLastPlayer() { if (boxData.length > 2) { boxData.pop(); saveData(); renderBoxes(); } }
+        function updateText(i, v) { boxData[i].text = v; saveData(); }
         function saveData() { localStorage.setItem('mySiteData', JSON.stringify(boxData)); }
-        function resetAll() { if (confirm("Reset everything?")) { boxData = [{ val: 0, text: 'Player 1' }, { val: 0, text: 'Player 2' }]; saveData(); renderBoxes(); } }
-        
+
+        // --- Original Functional Logic (Unchanged) ---
+
         function showWinner() {
-            const sorted = [...boxData].sort((a, b) => b.val - a.val);
-            document.getElementById('winner-info').innerHTML = `<h2>Winner: ${sorted[0].text}</h2><h3>Score: ${sorted[0].val}</h3>`;
+            const sorted = [...boxData].map((p, i) => ({...p, originalIndex: i})).sort((a, b) => b.val - a.val);
+            const high = sorted[0].val;
+            const toppers = sorted.filter(p => p.val === high);
+            
+            const winInfo = document.getElementById('winner-info');
+            const scoreList = document.getElementById('all-scores');
+            
+            document.getElementById('save-btn').innerHTML = '💾 SAVE';
+            document.getElementById('save-btn').disabled = false;
+            document.getElementById('save-btn').style.background = '#2ecc71';
+
+            if (toppers.length > 1) {
+                document.getElementById('match-status').innerText = "MATCH TIED! 🤝";
+                winInfo.innerHTML = `<div style="font-size:20px; font-weight:bold;">TIED BETWEEN</div><div style="font-size:24px; font-weight:900; margin:10px 0; color:#d35400;">${toppers.map(p=>p.text).join(" & ")}</div><div style="font-size:22px; font-weight:900;">SCORE: ${high}</div>`;
+            } else {
+                document.getElementById('match-status').innerText = "MATCH OVER!";
+                winInfo.innerHTML = `<div style="font-size:24px; font-weight:bold;">Winner 🥇</div><div style="font-size:34px; font-weight:900; margin:10px 0;">${toppers[0].text}</div><div style="font-size:16px; font-weight:900;">SCORE: ${high}</div>`;
+            }
+
+            scoreList.innerHTML = '<h3 style="text-align:center;">LEADERBOARD</h3>';
+            sorted.forEach(p => {
+                scoreList.innerHTML += `<div class="score-item ${colorClasses[p.originalIndex]}"><span>${p.text}</span><span>${p.val}</span></div>`;
+            });
+
             document.getElementById('winner-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
-        function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; }
-        
-        function showRules() { alert("Rules: Red=1, Yellow=2, Green=3, Brown=4, Blue=5, Pink=6, Black=7"); }
-        function showRecords() { alert("Match history feature is active."); }
+
+        function saveMatchData() {
+            const sorted = [...boxData].sort((a, b) => b.val - a.val);
+            const status = sorted[0].val === sorted[1].val ? "Tied Game" : "Winner: " + sorted[0].text;
+            const record = {
+                date: new Date().toLocaleString(),
+                status: status,
+                players: sorted.map(p => ({ name: p.text, score: p.val }))
+            };
+            let recs = JSON.parse(localStorage.getItem('snookerMatchRecords')) || [];
+            recs.unshift(record);
+            localStorage.setItem('snookerMatchRecords', JSON.stringify(recs));
+            
+            const b = document.getElementById('save-btn');
+            b.innerHTML = '✔ SAVED!'; b.style.background = '#27ae60'; b.disabled = true;
+        }
+
+        function showRecords() {
+            let recs = JSON.parse(localStorage.getItem('snookerMatchRecords')) || [];
+            const cont = document.getElementById('records-container');
+            cont.innerHTML = recs.length ? '' : '<p>No records.</p>';
+            recs.forEach((r, i) => {
+                let phtml = r.players.map(p => `<div class="hist-player"><span>${p.name}</span><span>${p.score}</span></div>`).join('');
+                cont.innerHTML += `<div class="history-card"><button class="close-cross" style="font-size:14px; width:25px; height:25px; top:10px; right:10px;" onclick="deleteRecord(${i})">✕</button><div class="hist-date">🕒 ${r.date}</div><div class="hist-status">${r.status}</div>${phtml}</div>`;
+            });
+            document.getElementById('records-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function deleteRecord(i) {
+            let recs = JSON.parse(localStorage.getItem('snookerMatchRecords'));
+            recs.splice(i, 1);
+            localStorage.setItem('snookerMatchRecords', JSON.stringify(recs));
+            showRecords();
+        }
+
+        function clearAllRecords() { if(confirm("Clear all?")) { localStorage.removeItem('snookerMatchRecords'); showRecords(); } }
+        function showRules() { document.getElementById('rules-overlay').style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+        function closeRules() { document.getElementById('rules-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; }
+        function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; }
+        function closeRecords() { document.getElementById('records-overlay').style.display = 'none'; document.body.style.overflow = 'auto'; }
+        function showPositionImage(src) { document.getElementById('position-img').src = src; document.getElementById('image-overlay').style.display = 'flex'; }
+        function closePositionImage() { document.getElementById('image-overlay').style.display = 'none'; }
+        function resetAll() { if (confirm("Reset?")) { boxData = [{ val: 0, text: 'Player 1' }, { val: 0, text: 'Player 2' }]; saveData(); renderBoxes(); } }
 
         window.onload = renderBoxes;
     </script>
