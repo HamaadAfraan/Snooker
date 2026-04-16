@@ -7,6 +7,7 @@
     <title>Snooker Scoreboard</title>
     <link rel="shortcut icon" href="8_ball.png">
     <style>
+        /* 1. Disable long press, selection and zoom */
         * {
             -webkit-user-select: none;
             -ms-user-select: none;
@@ -69,6 +70,25 @@
             background: rgba(255, 255, 255, 0.1);
             border-color: #ffd700;
             color: #ffd700;
+        }
+
+        /* Naya: Individual Score Reset Button */
+        .score-reset-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(5, 45, 31, 0.319);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
         }
 
         .remove-btn {
@@ -164,6 +184,8 @@
             min-width: 120px;
             text-align: center;
             margin: 0 10px;
+            touch-action: none;
+            background: transparent;
         }
 
         .player-input {
@@ -199,10 +221,6 @@
             transition: 0.2s;
         }
 
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-
         .complete-btn {
             background: #f1c40f;
             color: black;
@@ -212,7 +230,6 @@
             background: #e74c3c;
         }
 
-        /* Top Action Buttons */
         .top-btns {
             display: flex;
             gap: 10px;
@@ -229,28 +246,10 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
-            letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: bold;
-            transition: 0.3s;
         }
 
-        .rules-btn:hover {
-            background: #ffd700;
-            color: #1a1a2e;
-        }
-
-        .record-btn {
-            border-color: #3498db;
-            color: #3498db;
-        }
-
-        .record-btn:hover {
-            background: #3498db;
-            color: #fff;
-        }
-
-        /* Overlays (Winner, Rules, Images, Records) */
         .overlay-screen {
             display: none;
             position: fixed;
@@ -261,7 +260,6 @@
             background: rgba(10, 10, 46, 0.98);
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
             z-index: 2000;
             padding: 20px 10px;
             overflow-y: auto;
@@ -291,11 +289,6 @@
             height: 40px;
             border-radius: 50%;
             font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .winner-card {
@@ -378,6 +371,7 @@
             color: #ffd700;
         }
 
+
         .b-red {
             background: red;
         }
@@ -407,7 +401,6 @@
             border: 1px solid #333;
         }
 
-        /* Saved Records Styles */
         .history-card {
             background: rgba(255, 255, 255, 0.1);
             width: 90%;
@@ -415,93 +408,21 @@
             padding: 15px 20px;
             border-radius: 15px;
             margin-bottom: 15px;
-            box-sizing: border-box;
-            text-align: left;
             position: relative;
         }
 
-        .hist-date {
-            font-size: 14px;
-            color: #a4b0be;
-            margin-bottom: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 5px;
-            padding-right: 25px;
-        }
-
-        .hist-status {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffd700;
-            margin-bottom: 10px;
-            text-transform: capitalize;
-        }
-
-        .hist-player {
-            display: flex;
-            justify-content: space-between;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        /* Individual Delete Button */
-        .delete-single-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: transparent;
-            border: none;
-            color: #ff4757;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 5px;
-            transition: 0.2s;
-        }
-
-        .delete-single-btn:hover {
-            color: #ff6b81;
-            transform: scale(1.1);
-        }
-
-        .score-reset-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.7;
-        }
-
-        /* Footer Styles */
         .footer {
             margin-top: auto;
             padding: 20px;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.6);
             text-align: center;
-            width: 100%;
         }
 
         .footer a {
             color: #ffd700;
             text-decoration: none;
             font-weight: bold;
-            transition: color 0.3s;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-            color: #fff;
         }
     </style>
 </head>
